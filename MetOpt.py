@@ -47,14 +47,14 @@ def MyFunc3(X):  # Входная функция (Розенброка)
 #    return(df)
 
 def MyDiffx(f, X0):  # Производная по x в точке X0
-    eps2 = eps
+    eps2 = eps/1000
     xplusdx = np.array([X0[0] + eps2, X0[1]])
     xminusdx = np.array([X0[0] - eps2, X0[1]])
     return ((f(xplusdx) - f(xminusdx)) / (2 * eps2))
 
 
 def MyDiffy(f, X0):  # Производная по y в точке X0
-    eps2 = eps
+    eps2 = eps/1000
     yplusdy = np.array([X0[0], X0[1] + eps2])
     yminusdy = np.array([X0[0], X0[1] - eps2])
     return ((f(yplusdy) - f(yminusdy)) / (2 * eps2))
@@ -74,7 +74,7 @@ def MyGrad(f, X0):  # Градиент в точке X0
 #    return(np.sqrt(sum))
 
 def MyArgMin(f, X0, a, b):
-    eps2 = eps ** 3
+    eps2 = eps/1000
     while np.abs(b - a) > eps2:
         x = (a + b) / 2
         f1 = f(x - eps2, X0)
@@ -89,7 +89,7 @@ def MyArgMin(f, X0, a, b):
 
 
 def MyArgMin(f, X0, a, b):
-    eps2 = eps ** 2
+    eps2 = eps/1000
     while np.abs(b - a) > eps2:
         x = (a + b) / 2
         f1 = f(x - eps2)
@@ -105,7 +105,7 @@ def MyArgMin(f, X0, a, b):
 
 def MyHesse(f, X0):
     H = np.array([[0.0,0.0],[0.0,0.0]])
-    eps1=eps/10
+    eps1=eps/1000
     eps2=eps1**2
     f00=f(X0)
     f10=f(X0 + np.array([eps1, 0]))
@@ -346,22 +346,26 @@ def MNwED(f, X0):
         return(f(X + kappa * p))
     X = X0
     XX = np.array([X])
-    global itercountr
     w = -MyGrad(f, X)
     nw = lin.norm(w)
+    itercounter = 0
     while nw > eps:
         H = MyHesse(f, X)
         p = lin.solve(H, w)
-        kappa = MyArgMin(myFunc, X0, 0, 100)
+        kappa = MyArgMin(myFunc, X0, 0, 10)
         X = X + kappa * p
         XX = np.append(XX, np.array([X]), axis=0)
-        itercountr += 1
+        itercounter += 1
         w = -MyGrad(f, X)
         nw = lin.norm(w)
+        # print('p =', p)
+        # print('X =', X)
+        # print('kappa =', kappa)
         print('||w|| =', nw)
-        if itercountr >= 1000:
+        if itercounter >= 1000:
             print('To many iterations!!!')
             break
+    print('itercounter =', itercounter)
     return(X, f(X), XX)
 
 def MyBounds(points):
@@ -418,7 +422,10 @@ def MyContourPlot(f, xMinMax, yMinMax):
 
 def MyContourScatterArrowPlot(func, points):
     xBound, yBound = MyBounds(points)
+    # xBound = np.array([-10,10])
+    # yBound = np.array([-10,10])
     arrow_head_width = (xBound[1] - xBound[0]) / 50
+    arrow_line_width = (xBound[1] - xBound[0]) / 1000
     h = 7
     fig1 = plt.figure(figsize=(1.2 * h, h))
     MyContourPlot(func, xBound, yBound)
@@ -430,7 +437,7 @@ def MyContourScatterArrowPlot(func, points):
         #        if 100*curlen < inlen:
         #            break
         plt.scatter(point[0], point[1], color='black')
-        plt.arrow(ppoint[0], ppoint[1], point[0] - ppoint[0], point[1] - ppoint[1], head_width=arrow_head_width,
+        plt.arrow(ppoint[0], ppoint[1], point[0] - ppoint[0], point[1] - ppoint[1], width=arrow_line_width, head_width=arrow_head_width,
                   color='red', length_includes_head=True)
         ppoint = point
     plt.scatter(points[-1, 0], points[-1, 1], color='black')
@@ -443,7 +450,7 @@ def MyContourScatterArrowPlot(func, points):
 
 Xmin2, fmin2, Xit2 = MNwED(MyFunc2, startPoint2)
 print('Xmin =', np.around(Xmin2, decimals=3), 'fmin =', np.around(fmin2, decimals=3))
-print('funccounter =', countr, 'itercounter =', itercountr)
+# print('funccounter =', countr, 'itercounter =', itercountr)
 MyContourScatterArrowPlot(MyFunc2, Xit2[:, :])
 
 # Xmin11, fmin11, Xit11 = MNS( MyFunc1, startPoint1 )
