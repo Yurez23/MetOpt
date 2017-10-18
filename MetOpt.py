@@ -47,14 +47,14 @@ def MyFunc3(X):  # Входная функция (Розенброка)
 #    return(df)
 
 def MyDiffx(f, X0):  # Производная по x в точке X0
-    eps2 = eps/1000
+    eps2 = eps / 1000
     xplusdx = np.array([X0[0] + eps2, X0[1]])
     xminusdx = np.array([X0[0] - eps2, X0[1]])
     return ((f(xplusdx) - f(xminusdx)) / (2 * eps2))
 
 
 def MyDiffy(f, X0):  # Производная по y в точке X0
-    eps2 = eps/1000
+    eps2 = eps / 1000
     yplusdy = np.array([X0[0], X0[1] + eps2])
     yminusdy = np.array([X0[0], X0[1] - eps2])
     return ((f(yplusdy) - f(yminusdy)) / (2 * eps2))
@@ -74,7 +74,7 @@ def MyGrad(f, X0):  # Градиент в точке X0
 #    return(np.sqrt(sum))
 
 def MyArgMin(f, X0, a, b):
-    eps2 = eps/1000
+    eps2 = eps / 1000
     while np.abs(b - a) > eps2:
         x = (a + b) / 2
         f1 = f(x - eps2, X0)
@@ -89,7 +89,7 @@ def MyArgMin(f, X0, a, b):
 
 
 def MyArgMin(f, X0, a, b):
-    eps2 = eps/1000
+    eps2 = eps / 1000
     while np.abs(b - a) > eps2:
         x = (a + b) / 2
         f1 = f(x - eps2)
@@ -104,19 +104,21 @@ def MyArgMin(f, X0, a, b):
 
 
 def MyHesse(f, X0):
-    H = np.array([[0.0,0.0],[0.0,0.0]])
-    eps1=eps/1000
-    eps2=eps1**2
-    f00=f(X0)
-    f10=f(X0 + np.array([eps1, 0]))
-    f01=f(X0 + np.array([0, eps1]))
-    f11=f(X0 + np.array([eps1, eps1]))
-#    H[0,0] = (f00 + f(X0 + 2 * np.array([eps1, 0])) - 2 * f10) / (eps2)
-    H[1,0] = H[0,1] = (f00 + f11 - f10 - f01) / (eps2)
-#    H[1,1] = (f00 + f(X0 + 2 * np.array([0, eps1])) - 2 * f01) / (eps2)
-    H[0,0] = (f(X0 - np.array([eps1, 0])) + f10 - 2 * f00) / (eps2)
-    H[1,1] = (f(X0 - np.array([0, eps1])) + f01 - 2 * f00) / (eps2)
-    return(H)
+    H = np.array([[0.0, 0.0], [0.0, 0.0]])
+    eps1 = eps / 1000
+    eps2 = eps1 ** 2
+    f00 = f(X0)
+    f10 = f(X0 + np.array([eps1, 0]))
+    f01 = f(X0 + np.array([0, eps1]))
+    f11 = f(X0 + np.array([eps1, eps1]))
+    #    H[0,0] = (f00 + f(X0 + 2 * np.array([eps1, 0])) - 2 * f10) / (eps2)
+    H[1, 0] = H[0, 1] = (f00 + f11 - f10 - f01) / (eps2)
+    #    H[1,1] = (f00 + f(X0 + 2 * np.array([0, eps1])) - 2 * f01) / (eps2)
+    H[0, 0] = (f(X0 - np.array([eps1, 0])) + f10 - 2 * f00) / (eps2)
+    H[1, 1] = (f(X0 - np.array([0, eps1])) + f01 - 2 * f00) / (eps2)
+    return (H)
+
+
 #    return (
 #        np.array([[(f(X0) + f(X0 + 2 * np.array([eps, 0])) - 2 * f(X0 + np.array([eps, 0]))) / (eps ** 2),
 #                   (f(X0) + f(X0 + np.array([eps, eps])) - f(X0 + np.array([eps, 0])) - f(X0 + np.array([0, eps]))) / (
@@ -305,9 +307,9 @@ def MSG(f, X0):
         # print('normGrad =',normGrad2)
         if normGrad2 < eps:
             break
-        HX=MyHesse(f,X)
-        HXp=np.dot(HX,p)
-        gamma = -(np.dot(HXp,antiGrad2)/np.dot(HXp,p)) * (itercountr % 2)
+        HX = MyHesse(f, X)
+        HXp = np.dot(HX, p)
+        gamma = -(np.dot(HXp, antiGrad2) / np.dot(HXp, p)) * (itercountr % 2)
         # print('gamma =', gamma)
         p = gamma * p + antiGrad2
         # print('p =',p)
@@ -324,26 +326,33 @@ def MSG(f, X0):
 
     return (X, f(X), XX)
 
+
 def MN(f, X0):
     X = X0
     XX = np.array([X])
-    global itercountr
-#    H=np.array([[12,-4],[-4,6]])
+    #    H=np.array([[12,-4],[-4,6]])
     w = -MyGrad(f, X)
     nw = lin.norm(w)
+    itercounter = 0
     while nw > eps:
         H = MyHesse(f, X)
         p = lin.solve(H, w)
         X = X + p
         XX = np.append(XX, np.array([X]), axis=0)
-        itercountr += 1
+        itercounter += 1
         w = -MyGrad(f, X)
         nw = lin.norm(w)
-    return(X, f(X), XX)
+        if itercounter >= 1000:
+            print('To many iterations!!!')
+            break
+    print('itercounter =', itercounter)
+    return (X, f(X), XX)
+
 
 def MNwED(f, X0):
     def myFunc(kappa):
-        return(f(X + kappa * p))
+        return (f(X + kappa * p))
+
     X = X0
     XX = np.array([X])
     w = -MyGrad(f, X)
@@ -361,14 +370,40 @@ def MNwED(f, X0):
         # print('p =', p)
         # print('X =', X)
         # print('kappa =', kappa)
-        print('||w|| =', nw)
+        # print('||w|| =', nw)
         if itercounter >= 1000:
             print('To many iterations!!!')
             break
     print('itercounter =', itercounter)
-    return(X, f(X), XX)
+    return (X, f(X), XX)
 
-def MyBounds(points):
+
+def MNwSD(f, X0, kappa0=1, gamma=0.5, omega=0.1):
+    X = X0
+    kappa = kappa0
+    XX = np.array([X])
+    w = -MyGrad(f, X)
+    nw = lin.norm(w)
+    itercounter = 0
+    while nw > eps:
+        H = MyHesse(f, X)
+        p = lin.solve(H, w)
+        if itercounter >= 1 and abs(f(X) - f(XX[-2])) < omega * kappa * np.dot(w, p):
+            kappa = gamma * kappa
+            print(kappa)
+        X = X + kappa * p
+        XX = np.append(XX, np.array([X]), axis=0)
+        itercounter += 1
+        w = -MyGrad(f, X)
+        nw = lin.norm(w)
+        if itercounter >= 1000:
+            print('To many iterations!!!')
+            break
+    print('itercounter =', itercounter)
+    return (X, f(X), XX)
+
+
+def MyBounds(f, points):
     xleft = np.min(points[:, 0])
     xright = np.max(points[:, 0])
     yleft = np.min(points[:, 1])
@@ -402,17 +437,35 @@ def MyBounds(points):
     #    print()
     xBound = [xleft, xright]
     yBound = [yleft, yright]
+    # x = xleft
+    # y = yleft
+    # levnum = 3
+    # xstep = (xright - xleft) / levnum
+    # ystep = (yright - yleft) / levnum
+    # xlevels = np.array([])
+    # ylevels = np.array([])
+    # while x <= xright:
+    #     xlevels = np.append(xlevels, x)
+    #     x = x + xstep
+    # while y <= yright:
+    #     ylevels = np.append(ylevels, y)
+    #     y = y + ystep
+    # X, Y = np.meshgrid(xlevels, ylevels)
+    # print(X)
+    # Z = f([X, Y])
+    # Z = np.sort(Z.flatten())
     return (xBound, yBound)
 
 
 def MyContourPlot(f, xMinMax, yMinMax):
-    delta = (xMinMax[1] - xMinMax[0]) / 20
+    delta = (xMinMax[1] - xMinMax[0]) / 100
     x = np.arange(xMinMax[0], xMinMax[1], delta)
     y = np.arange(yMinMax[0], yMinMax[1], delta)
     X, Y = np.meshgrid(x, y)
     Z = f([X, Y])
-    #    plt.figure()
-    CS = plt.contourf(X, Y, Z)
+    levels1 = np.arange(0, 10, 1)
+    levels1 = levels1 ** 4
+    CS = plt.contour(X, Y, Z, levels1)
     plt.colorbar(CS)
 
 
@@ -421,7 +474,7 @@ def MyContourPlot(f, xMinMax, yMinMax):
 #    plt.title('Simplest default with labels')
 
 def MyContourScatterArrowPlot(func, points):
-    xBound, yBound = MyBounds(points)
+    xBound, yBound = MyBounds(func, points)
     # xBound = np.array([-10,10])
     # yBound = np.array([-10,10])
     arrow_head_width = (xBound[1] - xBound[0]) / 50
@@ -437,20 +490,22 @@ def MyContourScatterArrowPlot(func, points):
         #        if 100*curlen < inlen:
         #            break
         plt.scatter(point[0], point[1], color='black')
-        plt.arrow(ppoint[0], ppoint[1], point[0] - ppoint[0], point[1] - ppoint[1], width=arrow_line_width, head_width=arrow_head_width,
+        plt.arrow(ppoint[0], ppoint[1], point[0] - ppoint[0], point[1] - ppoint[1], width=arrow_line_width,
+                  head_width=arrow_head_width,
                   color='red', length_includes_head=True)
         ppoint = point
     plt.scatter(points[-1, 0], points[-1, 1], color='black')
     plt.show()
+
 
 # Xmin1, fmin1, Xit1 = MNwED(MyFunc1, startPoint1)
 # print('Xmin =', np.around(Xmin1, decimals=3), 'fmin =', np.around(fmin1, decimals=3))
 # print('funccounter =', countr, 'itercounter =', itercountr)
 # MyContourScatterArrowPlot(MyFunc1, Xit1[:, :])
 
-Xmin2, fmin2, Xit2 = MNwED(MyFunc2, startPoint2)
+Xmin2, fmin2, Xit2 = MNwSD(MyFunc2, startPoint2)
 print('Xmin =', np.around(Xmin2, decimals=3), 'fmin =', np.around(fmin2, decimals=3))
-# print('funccounter =', countr, 'itercounter =', itercountr)
+print('funccounter =', countr, 'itercounter =', itercountr)
 MyContourScatterArrowPlot(MyFunc2, Xit2[:, :])
 
 # Xmin11, fmin11, Xit11 = MNS( MyFunc1, startPoint1 )
