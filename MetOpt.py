@@ -336,9 +336,32 @@ def MN(f, X0):
         p = lin.solve(H, w)
         X = X + p
         XX = np.append(XX, np.array([X]), axis=0)
-        itercountr += 1        
+        itercountr += 1
         w = -MyGrad(f, X)
         nw = lin.norm(w)
+    return(X, f(X), XX)
+
+def MNwED(f, X0):
+    def myFunc(kappa):
+        return(f(X + kappa * p))
+    X = X0
+    XX = np.array([X])
+    global itercountr
+    w = -MyGrad(f, X)
+    nw = lin.norm(w)
+    while nw > eps:
+        H = MyHesse(f, X)
+        p = lin.solve(H, w)
+        kappa = MyArgMin(myFunc, X0, 0, 100)
+        X = X + kappa * p
+        XX = np.append(XX, np.array([X]), axis=0)
+        itercountr += 1
+        w = -MyGrad(f, X)
+        nw = lin.norm(w)
+        print('||w|| =', nw)
+        if itercountr >= 1000:
+            print('To many iterations!!!')
+            break
     return(X, f(X), XX)
 
 def MyBounds(points):
@@ -413,14 +436,12 @@ def MyContourScatterArrowPlot(func, points):
     plt.scatter(points[-1, 0], points[-1, 1], color='black')
     plt.show()
 
-print(MyFunc2(startPoint2))
+# Xmin1, fmin1, Xit1 = MNwED(MyFunc1, startPoint1)
+# print('Xmin =', np.around(Xmin1, decimals=3), 'fmin =', np.around(fmin1, decimals=3))
+# print('funccounter =', countr, 'itercounter =', itercountr)
+# MyContourScatterArrowPlot(MyFunc1, Xit1[:, :])
 
-#Xmin1, fmin1, Xit1 = MN(MyFunc1, startPoint1)
-#print('Xmin =', np.around(Xmin1, decimals=3), 'fmin =', np.around(fmin1, decimals=3))
-#print('funccounter =', countr, 'itercounter =', itercountr)
-#MyContourScatterArrowPlot(MyFunc1, Xit1[:, :])
-
-Xmin2, fmin2, Xit2 = MN(MyFunc2, startPoint2)
+Xmin2, fmin2, Xit2 = MNwED(MyFunc2, startPoint2)
 print('Xmin =', np.around(Xmin2, decimals=3), 'fmin =', np.around(fmin2, decimals=3))
 print('funccounter =', countr, 'itercounter =', itercountr)
 MyContourScatterArrowPlot(MyFunc2, Xit2[:, :])
