@@ -103,6 +103,38 @@ def MyArgMin(f, X0, a, b):
     return (x)
 
 
+def golden_section(func, bracket):
+    k = (np.sqrt(5) - 1) / 2
+    a, b = bracket
+    l = b - a
+    l = k * l
+    x = b - l
+    y = a + l
+    fx, fy = func(x), func(y)
+    iter_count = 0
+    while True:
+        l = k * l
+        if fx >= fy:
+            a = x
+            x = y
+            y = a + l
+        else:
+            b = y
+            y = x
+            x = b - l
+        fx, fy = (func(x), func(y))
+        if l < eps:
+            fmin = np.min((fx, fy))
+            xmin = np.argmin((fx, fy))
+            if xmin:
+                xmin = y
+            else:
+                xmin = x
+            break
+        iter_count += 1
+    return (xmin, fmin, iter_count)
+
+
 def MyHesse(f, X0):
     H = np.array([[0.0, 0.0], [0.0, 0.0]])
     eps1 = eps / 1000
